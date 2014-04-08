@@ -14,6 +14,13 @@ local output = function()
     "\n"..ansicolors("%{bright}"..status.description)
   end
 
+  local dryrun_description = function(status, options)
+    return "\n\n"..ansicolors("%{magenta}"..s('output.dryrun')).." → "..
+    ansicolors("%{cyan}"..status.info.short_src).." @ "..
+    ansicolors("%{cyan}"..status.info.linedefined)..
+    "\n"..ansicolors("%{bright}"..status.description)
+  end
+
   local error_description = function(status, options)
     return "\n\n"..ansicolors("%{red}"..s('output.failure')).." → "..
     ansicolors("%{cyan}"..status.info.short_src).." @ "..
@@ -34,14 +41,19 @@ local output = function()
     return ansicolors('%{yellow}●')
   end
 
+  local dryrun_string = function()
+    return ansicolors('%{magenta}●')
+  end
   local running_string = function()
     return ansicolors('%{blue}○')
   end
 
-  local status_string = function(short_status, descriptive_status, successes, failures, pendings, ms, options)
+  local status_string = function(short_status, descriptive_status, successes, failures, pendings, dryruns, ms, options)
     local success_str = s('output.success_plural')
     local failure_str = s('output.failure_plural')
     local pending_str = s('output.pending_plural')
+
+    local dryrun_str = s('output.dryrun_plural')
 
     if successes == 0 then
       success_str = s('output.success_zero')
@@ -61,6 +73,12 @@ local output = function()
       pending_str = s('output.pending_single')
     end
 
+    if dryruns == 0 then
+      dryrun_str = s('output.dryrun_zero')
+    elseif dryruns ==1 then
+      dryrun_str = s('output.dryrun_single')
+    end
+
     if not options.defer_print then
       io.write("\08 ")
       short_status = ""
@@ -72,6 +90,7 @@ local output = function()
     ansicolors('%{green}'..successes).." "..success_str.." / "..
     ansicolors('%{red}'..failures).." "..failure_str.." / "..
     ansicolors('%{yellow}'..pendings).." "..pending_str.." : "..
+    ansicolors('%{magenta}'..dryruns).." "..dryrun_str.." : "..
     ansicolors('%{bright}'..formatted_time).." "..s('output.seconds').."."..descriptive_status
   end
 
@@ -81,15 +100,17 @@ local output = function()
     local successes = 0
     local failures = 0
     local pendings = 0
+    local dryruns = 0
 
     for i,status in ipairs(statuses) do
       if status.type == "description" then
-        local inner_short_status, inner_descriptive_status, inner_successes, inner_failures, inner_pendings = format_statuses(status, options)
+        local inner_short_status, inner_descriptive_status, inner_successes, inner_failures, inner_pendings, inner_dryruns = format_statuses(status, options)
         short_status = short_status..inner_short_status
         descriptive_status = descriptive_status..inner_descriptive_status
         successes = inner_successes + successes
         failures = inner_failures + failures
         pendings = inner_pendings + pendings
+        dryruns = inner_dryruns + dryruns
       elseif status.type == "success" then
         short_status = short_status..success_string(options)
         successes = successes + 1
@@ -109,16 +130,23 @@ local output = function()
         if not options.suppress_pending then
           descriptive_status = descriptive_status..pending_description(status, options)
         end
+      elseif status.type == "dryrun" then
+        short_status = short_status..dryrun_string(options)
+        dryruns = dryruns + 1
+        if options.dry_run then
+          descriptive_status = descriptive_status..dryrun_description(status, options)
+        end
       end
     end
 
-    return short_status, descriptive_status, successes, failures, pendings
+    return short_status, descriptive_status, successes, failures, pendings, dryruns
   end
 
   local strings = {
     failure = failure_string,
     success = success_string,
     pending = pending_string,
+    dryrun = dryrun_string,
   }
 
   local on_first
@@ -133,8 +161,8 @@ local output = function()
 
 
     formatted_status = function(statuses, options, ms)
-      local short_status, descriptive_status, successes, failures, pendings = format_statuses(statuses, options)
-      return status_string(short_status, descriptive_status, successes, failures, pendings, ms, options)
+      local short_status, descriptive_status, successes, failures, pendings, dryruns = format_statuses(statuses, options)
+      return status_string(short_status, descriptive_status, successes, failures, pendings, dryruns, ms, options)
     end,
 
     currently_executing = function(test_status, options)

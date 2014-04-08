@@ -34,6 +34,7 @@ cli:add_flag("-v, --verbose", "verbose output of errors")
 cli:add_flag("-s, --enable-sound", "executes 'say' command if available")
 cli:add_flag("--suppress-pending", "suppress 'pending' test output")
 cli:add_flag("--defer-print", "defer print to when test suite is complete")
+cli:add_flag("--dryrun", "do not execute tests")
 
 local args = cli:parse_args()
 
@@ -115,6 +116,7 @@ if args then
     success_messages = busted.success_messages or nil,
     failure_messages = busted.failure_messages or nil,
     filelist = nil,
+    dry_run = args.dryrun,
   }
 
   -- We report an error if the same tag appears in both 'options.tags'

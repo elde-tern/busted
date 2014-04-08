@@ -320,6 +320,10 @@ local syncwrapper = function(f)
   end
 end
 
+local is_dry_run = function()
+  return options.dry_run
+end
+
 local next_test
 
 next_test = function()
@@ -474,18 +478,18 @@ next_test = function()
   check_before(this_test.context)
 
   for p=1, #parents do
-    if parents[p].before_each then
+    if (not is_dry_run()) and parents[p].before_each then
       table.insert(steps, parents[p].before_each)
     end
   end
 
-  if this_test.context.before_each then
+  if (not is_dry_run()) and this_test.context.before_each then
     table.insert(steps, this_test.context.before_each)
   end
 
   table.insert(steps, execute_test)
 
-  if this_test.context.after_each then
+  if (not is_dry_run()) and this_test.context.after_each then
     table.insert(steps, this_test.context.after_each)
   end
 
@@ -653,6 +657,10 @@ busted.pending = function(name)
     info = buildInfo(debug_info)
   }
 
+  if is_dry_run() then
+    test.status.type = 'dryrun'
+  end
+
   if match_tags(test.name) then
     table.insert(suite.tests, test)
   end
@@ -680,6 +688,11 @@ busted.raw_it = function(name, test_func)
     type = 'success',
     info = buildInfo(debug_info)
   }
+
+  if is_dry_run() then
+    test.f = syncwrapper(function() end)
+    test.status.type = 'dryrun'
+  end
 
   if match_tags(test.name) then
     table.insert(suite.tests, test)
@@ -774,6 +787,7 @@ busted.run = function(got_options)
 
   local statuses = {}
   local failures = 0
+  local dryruns = 0
   local suites = {}
   local tests = 0
 
@@ -793,6 +807,9 @@ busted.run = function(got_options)
       table.insert(statuses, test.status)
       if test.status.type == 'failure' then
         failures = failures + 1
+      end
+      if test.status.type == 'dryrun' then
+        dryruns = dryruns + 1
       end
     end
   end

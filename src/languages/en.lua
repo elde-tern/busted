@@ -6,18 +6,22 @@ s:set_namespace("en")
 s:set("output.pending", "Pending")
 s:set("output.failure", "Failure")
 s:set("output.success", "Success")
+s:set("output.dryrun", "Dry Run")
 
 s:set("output.pending_plural", "pending")
 s:set("output.failure_plural", "failures")
 s:set("output.success_plural", "successes")
+s:set("output.dryrun_plural", "dry runs")
 
 s:set("output.pending_zero", "pending")
 s:set("output.failure_zero", "failures")
 s:set("output.success_zero", "successes")
+s:set("output.dryrun_zero", "dry runs")
 
 s:set("output.pending_single", "pending")
 s:set("output.failure_single", "failure")
 s:set("output.success_single", "success")
+s:set("output.dryrun_single", "dry run")
 
 s:set("output.seconds", "seconds")
 
