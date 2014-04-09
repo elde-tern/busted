@@ -1,0 +1,6 @@
+describe("after_each", function()
+  after_each(function()
+    error("after_each should not be executed")
+  end)
+  it("test", function() end)
+end)

@@ -1,0 +1,6 @@
+describe("before_each", function()
+  before_each(function()
+    error("before_each should not be executed")
+  end)
+  it("test", function() end)
+end)

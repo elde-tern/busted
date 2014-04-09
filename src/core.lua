@@ -478,18 +478,18 @@ next_test = function()
   check_before(this_test.context)
 
   for p=1, #parents do
-    if (not is_dry_run()) and parents[p].before_each then
+    if parents[p].before_each then
       table.insert(steps, parents[p].before_each)
     end
   end
 
-  if (not is_dry_run()) and this_test.context.before_each then
+  if this_test.context.before_each then
     table.insert(steps, this_test.context.before_each)
   end
 
   table.insert(steps, execute_test)
 
-  if (not is_dry_run()) and this_test.context.after_each then
+  if this_test.context.after_each then
     table.insert(steps, this_test.context.after_each)
   end
 
@@ -602,21 +602,37 @@ end
 
 busted.setup = function(before_func)
   assert(type(before_func) == "function", "Expected function, got "..type(before_func))
+  if is_dry_run() then
+    current_context.before = syncwrapper(function() end)
+    return
+  end
   current_context.before = syncwrapper(before_func)
 end
 
 busted.before_each = function(before_func)
   assert(type(before_func) == "function", "Expected function, got "..type(before_func))
+  if is_dry_run() then
+    current_context.before_each = syncwrapper(function() end)
+    return
+  end
   current_context.before_each = syncwrapper(before_func)
 end
 
 busted.teardown = function(after_func)
   assert(type(after_func) == "function", "Expected function, got "..type(after_func))
+  if is_dry_run() then
+    current_context.after = syncwrapper(function() end)
+    return
+  end
   current_context.after = syncwrapper(after_func)
 end
 
 busted.after_each = function(after_func)
   assert(type(after_func) == "function", "Expected function, got "..type(after_func))
+  if is_dry_run() then
+    current_context.after_each = syncwrapper(function() end)
+    return
+  end
   current_context.after_each = syncwrapper(after_func)
 end
 
