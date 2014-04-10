@@ -1,6 +1,0 @@
-describe("setup", function()
-  setup(function()
-    error("setup should not be executed")
-  end)
-  it("test", function() end)
-end)

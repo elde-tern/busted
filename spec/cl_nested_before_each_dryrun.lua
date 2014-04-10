@@ -1,8 +1,0 @@
-describe("before_each", function()
-  before_each(function()
-    error("before_each should not be executed")
-  end)
-  describe("nested context", function()
-    it("test", function() end)
-  end)
-end)

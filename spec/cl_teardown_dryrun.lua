@@ -1,6 +1,0 @@
-describe("teardown", function()
-  teardown(function()
-    error("teardown should not be executed")
-  end)
-  it("test", function() end)
-end)
