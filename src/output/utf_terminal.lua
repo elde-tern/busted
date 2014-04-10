@@ -86,11 +86,16 @@ local output = function()
 
     local formatted_time = ("%.6f"):format(ms):gsub("([0-9])0+$", "%1")
 
+    if dryruns > 0 then
+        return short_status.."\n"..
+        ansicolors('%{magenta}'..dryruns).." "..dryrun_str.." : " ..
+        ansicolors('%{bright}'..formatted_time).." "..s('output.seconds').."."..descriptive_status
+    end
+
     return short_status.."\n"..
     ansicolors('%{green}'..successes).." "..success_str.." / "..
     ansicolors('%{red}'..failures).." "..failure_str.." / "..
     ansicolors('%{yellow}'..pendings).." "..pending_str.." : "..
-    ansicolors('%{magenta}'..dryruns).." "..dryrun_str.." : "..
     ansicolors('%{bright}'..formatted_time).." "..s('output.seconds').."."..descriptive_status
   end
 
